@@ -1,0 +1,104 @@
+<div class="container mt-4">
+  <div class="card shadow-sm rounded-3">
+    <div class="card-header bg-light">
+      <h3 class="mb-0">{{ title }}</h3>
+    </div>
+
+    <div class="card-body">
+      <!-- Error Message Display -->
+      <div *ngIf="error" class="alert alert-danger" role="alert">
+        <strong>Error:</strong> {{ error }}
+      </div>
+
+      <div *ngIf="loading" class="text-center">Loading request...</div>
+      
+      <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <!-- Type Dropdown -->
+        <div class="mb-3">
+          <label class="form-label">Type</label>
+          <select class="form-select" formControlName="type"
+                  [ngClass]="{ 'is-invalid': submitted && f.type.errors }">
+            <option value="">-- Select Type --</option>
+            <option value="Equipment">Equipment</option>
+            <option value="Leave">Leave</option>
+            <option value="Resources">Resources</option>
+          </select>
+          <div *ngIf="submitted && f.type.errors" class="invalid-feedback">
+            Type is required
+          </div>
+        </div>
+
+        <!-- Employee Display/Selection -->
+        <div class="mb-3">
+          <label class="form-label">Employee</label>
+          
+          <!-- 1. ADD MODE: Show Select Dropdown -->
+          <select *ngIf="isAddMode" class="form-select" formControlName="employeeId"
+                  [ngClass]="{ 'is-invalid': submitted && f.employeeId.errors }">
+            <option value="">-- Select Employee --</option>
+            <option *ngFor="let emp of employees" [value]="emp.employeeId">
+              {{ emp.employeeId }} ({{ emp.email || 'N/A' }}) 
+            </option>
+          </select>
+          
+          <!-- 2. EDIT MODE: Show Read-Only Text -->
+          <div *ngIf="!isAddMode" 
+               class="form-control bg-light text-muted" 
+               style="cursor: default;">
+            <!-- Display the currently selected employee ID from the form value -->
+            {{ f.employeeId.value }}
+          </div>
+
+          <div *ngIf="submitted && f.employeeId.errors && isAddMode" class="invalid-feedback d-block">
+            Employee is required
+          </div>
+        </div>
+
+        <!-- Items Form Array -->
+        <div formArrayName="items" class="mb-3">
+          <label class="form-label">Items</label>
+          
+          <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="d-flex gap-2 mb-3 align-items-start">
+            
+            <div class="flex-grow-1">
+                <input type="text" formControlName="name" placeholder="Item Name" 
+                        class="form-control" 
+                        [ngClass]="{ 'is-invalid': submitted && item.get('name')!.invalid }" />
+                <div *ngIf="submitted && item.get('name')!.errors" class="invalid-feedback d-block">
+                    Item name is required.
+                </div>
+            </div>
+            
+            <div class="w-25" style="min-width: 80px;">
+                <input type="number" formControlName="qty" placeholder="Qty" min="1" 
+                        class="form-control"
+                        [ngClass]="{ 'is-invalid': submitted && item.get('qty')!.invalid }" />
+                <div *ngIf="submitted && item.get('qty')!.errors" class="invalid-feedback d-block">
+                    Qty is required (min 1).
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-danger align-self-stretch" (click)="removeItem(i)" [disabled]="items.length === 1 && f.items.enabled">
+              <i class="bi bi-x-lg"></i> X
+            </button>
+          </div>
+
+          <div *ngIf="submitted && f.items.errors" class="text-danger mt-2">
+            At least one item is required.
+          </div>
+          <button type="button" class="btn btn-secondary mt-2" (click)="addItem()">+ Add Item</button>
+        </div>
+
+        <!-- Submission Buttons -->
+        <div class="d-flex justify-content-start mt-4 pt-2 border-top">
+          <button type="submit" [disabled]="submitting" class="btn btn-primary me-2 shadow-sm">
+            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+            Save
+          </button>
+          <a routerLink="/admin/requests" class="btn btn-secondary shadow-sm">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

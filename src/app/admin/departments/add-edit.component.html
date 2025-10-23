@@ -1,0 +1,36 @@
+<h2 *ngIf="isAddMode">Add Department</h2>
+<h2 *ngIf="!isAddMode">Edit Department</h2>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="form-group">
+    <label>Department Name</label>
+    <input 
+      type="text" 
+      formControlName="name" 
+      class="form-control" 
+      [ngClass]="{ 'is-invalid': submitting && form.controls['name'].errors }" 
+    />
+    <div *ngIf="submitting && form.controls['name'].errors" class="invalid-feedback">
+      <div *ngIf="form.controls['name'].errors['required']">Department name is required</div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Description</label>
+    <textarea 
+      formControlName="description" 
+      class="form-control">
+    </textarea>
+  </div>
+
+  <!-- ✅ Employee count display (only in edit mode) -->
+  <div *ngIf="!isAddMode" class="mt-2">
+    <strong>Employees in this department:</strong> {{ getEmployeeCount() }}
+  </div>
+
+  <button [disabled]="submitting" class="btn btn-primary mt-3">
+    <span *ngIf="submitting" class="spinner-border spinner-border-sm"></span>
+    Save
+  </button>
+  <a routerLink="../" class="btn btn-link mt-3">Cancel</a>
+</form>

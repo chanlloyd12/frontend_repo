@@ -1,0 +1,92 @@
+<div class="container mt-4">
+  <h1>Employees</h1>
+    <div *ngIf="message" 
+        class="alert mt-3 fade show d-flex justify-content-between align-items-center"
+        [ngClass]="{'alert-danger': isError, 'alert-success': !isError}">
+      <span>{{ message }}</span>
+      <button type="button" class="btn-close ms-3" (click)="message = null"></button>
+    </div>
+  <p>
+    <a routerLink="add" class="btn btn-sm btn-primary mb-2">Add Employee</a>
+  </p>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th style="width: 15%">Employee ID</th>
+        <th style="width: 20%">Account</th>
+        <th style="width: 15%">Position</th>
+        <th style="width: 15%">Department</th>
+        <th style="width: 15%">Hire Date</th>
+        <th style="width: 10%">Status</th>
+        <th style="width: 20%">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let employee of employees">
+        <td>{{ employee.employeeId || '—' }}</td>
+        <td>{{ employee.email }}</td>
+        <td>{{ employee.position || '—' }}</td>
+        <td>{{ employee.department || '—' }}</td>
+        <td>{{ employee.hireDate ? (employee.hireDate | date:'shortDate') : '—' }}</td>
+        <td>
+          <span
+            class="badge"
+            [ngClass]="{
+              'bg-success': employee.status === 'Active',
+              'bg-danger': employee.status === 'Inactive'
+            }">
+            {{ employee.status }}
+          </span>
+        </td>
+        <td style="white-space: nowrap">
+          <a [routerLink]="['/admin/requests/employee', employee.employeeId]" class="btn btn-sm btn-info me-1">Requests</a>
+          <a [routerLink]="['/admin/workflows/employee', employee.employeeId]" class="btn btn-sm btn-info me-1">Workflows</a>
+          <button class="btn btn-sm btn-warning me-1" (click)="openTransferModal(transferModal, employee)">Transfer</button>
+          <a routerLink="edit/{{ employee.employeeId }}" class="btn btn-sm btn-primary">Edit</a>
+        </td>
+      </tr>
+
+      <tr *ngIf="!employees || employees.length === 0">
+        <td colspan="7" class="text-center">
+          <span class="spinner-border spinner-border-lg align-center"></span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ✅ Transfer Modal (no success message here) -->
+<ng-template #transferModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Transfer Employee</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <div class="modal-body">
+    <p><strong>Employee ID:</strong> {{ selectedEmployee?.employeeId }}</p>
+    <p><strong>Current Department:</strong> {{ selectedEmployee?.department || 'Unknown' }}</p>
+
+    <div class="form-group">
+      <label for="departmentSelect">New Department:</label>
+      <select class="form-select" id="departmentSelect" [(ngModel)]="selectedDepartment">
+        <option value="" disabled selected>Select a department</option>
+        <option *ngFor="let dept of departments" [value]="dept.name">{{ dept.name }}</option>
+      </select>
+    </div>
+
+    <!-- ❌ Removed modal success message -->
+    <!-- Only errors remain -->
+    <div *ngIf="modalMessage" class="mt-3">
+      <div class="alert alert-danger" role="alert">{{ modalMessage }}</div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+    <button class="btn btn-warning" [disabled]="submitting" (click)="confirmTransfer(modal)">
+      {{ submitting ? 'Submitting...' : 'Confirm Transfer' }}
+    </button>
+  </div>
+</ng-template>
+

@@ -1,0 +1,36 @@
+<!-- <div class="container mt-3">
+  <h3>Employee {{ employeeId }} - Transfers</h3>
+
+  <ng-template #transferModalTemplate let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">Transfers</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+
+    <div class="modal-body">
+      <div class="d-flex justify-content-between mb-2">
+        <button class="btn btn-primary btn-sm" (click)="addTransfer('Finance')">Add Transfer</button>
+      </div>
+
+      <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of transfers">
+            <td>{{ t.fromDept || '—' }}</td>
+            <td>{{ t.toDept || '—' }}</td>
+            <td>{{ t.status || '—' }}</td>
+          </tr>
+          <tr *ngIf="!transfers || transfers.length === 0">
+            <td colspan="3" class="text-muted">No transfers found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-template>
+</div> -->

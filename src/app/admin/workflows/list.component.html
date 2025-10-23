@@ -1,0 +1,52 @@
+<div class="container mt-4">
+  <h3>WORKFLOWS FOR EMPLOYEE: {{ employeeId }}</h3>
+
+  <div *ngIf="loading" class="text-center my-5">
+    <span class="spinner-border spinner-border-lg align-center"></span>
+    <p>Loading workflows...</p>
+  </div>
+
+  <table class="table table-striped" *ngIf="!loading && workflows.length > 0; else noData">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th style="width: 50%">Details</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let wf of workflows">
+        <td><span>{{ wf.type }}</span></td>
+        <td><div style="white-space: pre-wrap;">{{ wf.details }}</div></td>
+        <td>
+          <span
+            class="badge"
+            [ngClass]="{
+              'bg-success': wf.status === 'Approved',
+              'bg-warning': wf.status === 'Pending',
+              'bg-danger': wf.status === 'Rejected'
+            }">
+            {{ wf.status }}
+          </span>
+        </td>
+        <td>
+          <select
+            class="form-select form-select-sm"
+            [(ngModel)]="wf.status"
+            (change)="updateStatus(wf)">
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #noData>
+    <div *ngIf="!loading" class="alert alert-info">No workflows found for Employee ID {{ employeeId }}.</div>
+  </ng-template>
+
+  <a routerLink="/admin/employees" class="btn btn-secondary mt-3">Back to Employees</a>
+</div>

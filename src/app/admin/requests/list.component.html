@@ -1,0 +1,40 @@
+<div class="container mt-4">
+  <h2>Requests</h2>
+  <button class="btn btn-primary mb-2" [routerLink]="['/admin/requests/add']">Add Request</button>
+
+  <table class="table table-striped" *ngIf="!loading && requests.length > 0; else noData">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Employee</th>
+        <th>Items</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of requests">
+        <td>{{ r.type }}</td>
+        <td>{{ r.email }} ({{ r.employeeId }})</td> 
+        <td>{{ toStringItems(r.items) }}</td> 
+        <td>
+          <span class="badge" [ngClass]="{ 
+            'bg-warning text-dark': r.status === 'Pending',
+            'bg-success': r.status === 'Approved' || r.status === 'Fulfilled',
+            'bg-danger': r.status === 'Rejected'
+          }">
+            {{ r.status }}
+          </span>
+        </td>
+        <td>
+          <a [routerLink]="['/admin/requests/edit', r.requestId]" class="btn btn-sm btn-info">Edit</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #noData>
+    <div *ngIf="!loading">No requests found.</div>
+    <div *ngIf="loading">Loading...</div>
+  </ng-template>
+</div>

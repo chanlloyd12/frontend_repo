@@ -1,0 +1,29 @@
+﻿<div class="app-container" [ngClass]="{ 'bg-light': account }">
+    <!-- main nav -->
+    <nav class="navbar navbar-expand navbar-dark bg-dark px-3" *ngIf="account">
+        <!-- Left side -->
+        <div class="navbar-nav me-auto">
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link">Home</a>
+            <a routerLink="/profile" routerLinkActive="active" class="nav-item nav-link">Profile</a>
+        </div>
+
+        <!-- Right side -->
+        <div class="navbar-nav ms-auto">
+            <a *ngIf="account.role === Role.Admin" routerLink="/admin/accounts" routerLinkActive="active" class="nav-item nav-link">Accounts</a>
+            <a *ngIf="account.role === Role.Admin" routerLink="/admin/employees" routerLinkActive="active" class="nav-item nav-link">Employees</a>
+            <a *ngIf="account.role === Role.Admin" routerLink="/admin/departments" routerLinkActive="active" class="nav-item nav-link">Departments</a>
+            <a *ngIf="account.role === Role.Admin" routerLink="/admin/requests" routerLinkActive="active" class="nav-item nav-link">Requests</a>
+
+            <button (click)="logout()" class="btn btn-link nav-item nav-link">Logout</button>
+        </div>
+    </nav>
+
+    <!-- subnav router outlet -->
+    <router-outlet name="subnav"></router-outlet>
+
+    <!-- global alert -->
+    <alert></alert>
+
+    <!-- main router outlet -->
+    <router-outlet></router-outlet>
+</div>
