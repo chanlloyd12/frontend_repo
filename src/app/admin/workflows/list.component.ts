@@ -29,19 +29,7 @@ export class WorkflowListComponent implements OnInit {
       .pipe(first())
       .subscribe({
         next: (data) => {
-          // Format the workflows
-          this.workflows = data.map(wf => {
-            if (wf.type === 'Request Approval' && wf.request) {
-              wf.details =
-                `requestId: ${wf.request.requestId}\n` +
-                `requestType: ${wf.request.type}\n` +
-                `requesterId: ${wf.request.employeeId}\n` +
-                `message: Review ${wf.request.type} request #${wf.request.requestId} from Employee ID ${wf.request.employeeId}.`;
-            } else if (wf.type === 'Department Transfer' && wf.transfer) {
-              wf.details = `Transfer request from ${wf.transfer.fromDept} to ${wf.transfer.toDept}`;
-            }
-            return wf;
-          });
+          this.workflows = data;
           this.loading = false;
         },
         error: (error) => {
@@ -49,8 +37,7 @@ export class WorkflowListComponent implements OnInit {
           this.loading = false;
         }
       });
-}
-
+  }
 
   updateStatus(wf: Workflow) {
     if (wf.id === undefined) {
