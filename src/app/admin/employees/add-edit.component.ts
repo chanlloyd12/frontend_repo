@@ -18,6 +18,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
   submitting = false;
   submitted = false;
   private routeSub!: Subscription;
+  isEditMode: boolean = false; // <-- New property to track mode
 
   accounts: any[] = [];
   departments: any[] = [];
@@ -33,64 +34,68 @@ export class AddEditComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-  // load accounts
-  this.accountService.getAll()
-    .pipe(first())
-    .subscribe({
-      next: (data: any[]) => {
-        this.accounts = data.filter(acc => acc.status === 'Active');
-      },
-      error: (err) => console.error('Error loading accounts', err)
+    // load accounts
+    this.accountService.getAll()
+      .pipe(first())
+      .subscribe({
+        next: (data: any[]) => {
+          this.accounts = data.filter(acc => acc.status === 'Active');
+        },
+        error: (err) => console.error('Error loading accounts', err)
+      });
+
+    // load departments
+    this.departmentService.getAll()
+      .pipe(first())
+      .subscribe({
+        next: (data: any[]) => {
+          this.departments = data;
+        },
+        error: (err) => console.error('Error loading departments', err)
+      });
+
+    this.routeSub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.isEditMode = !!this.id; // <-- Set the edit mode flag
+      this.initForm();
+
+      this.title = this.id ? 'Edit Employee' : 'Create Employee';
+
+      if (this.id) {
+        // editing
+        this.loading = true;
+        // Disable accountId if editing, similar to employeeId
+        this.form.get('accountId')?.disable(); // <-- Disable accountId in edit mode
+        
+        this.employeeService.getById(this.id)
+          .pipe(first())
+          .subscribe({
+            next: (x: any) => {
+              this.form.patchValue({
+                employeeId: x.employeeId,
+                accountId: x.accountId,
+                position: x.position,
+                department: x.department,
+                hireDate: x.hireDate,
+                status: x.status ?? 'Active'
+              });
+              this.loading = false;
+            },
+            error: () => { this.loading = false; }
+          });
+      } else {
+        // ✅ creating → fetch next employeeId
+        this.employeeService.getNextId()
+          .pipe(first())
+          .subscribe({
+            next: (res) => {
+              this.form.patchValue({ employeeId: res.employeeId });
+            },
+            error: (err) => console.error('Error fetching next employeeId', err)
+          });
+      }
     });
-
-  // load departments
-  this.departmentService.getAll()
-    .pipe(first())
-    .subscribe({
-      next: (data: any[]) => {
-        this.departments = data;
-      },
-      error: (err) => console.error('Error loading departments', err)
-    });
-
-  this.routeSub = this.route.params.subscribe(params => {
-    this.id = params['id'];
-    this.initForm();
-
-    this.title = this.id ? 'Edit Employee' : 'Create Employee';
-
-    if (this.id) {
-      // editing
-      this.loading = true;
-      this.employeeService.getById(this.id)
-        .pipe(first())
-        .subscribe({
-          next: (x: any) => {
-            this.form.patchValue({
-              employeeId: x.employeeId,
-              accountId: x.accountId,
-              position: x.position,
-              department: x.department,
-              hireDate: x.hireDate,
-              status: x.status ?? 'Active'
-            });
-            this.loading = false;
-          },
-          error: () => { this.loading = false; }
-        });
-    } else {
-      // ✅ creating → fetch next employeeId
-      this.employeeService.getNextId()
-        .pipe(first())
-        .subscribe({
-          next: (res) => {
-            this.form.patchValue({ employeeId: res.employeeId });
-          },
-          error: (err) => console.error('Error fetching next employeeId', err)
-        });
-    }
-  });
-}
+  }
 
   ngOnDestroy() {
     if (this.routeSub) this.routeSub.unsubscribe();
@@ -98,8 +103,10 @@ export class AddEditComponent implements OnInit, OnDestroy {
 
   private initForm() {
     this.form = this.formBuilder.group({
-      employeeId: [{ value: '', disabled: true }],
-      accountId: ['', Validators.required],
+      // employeeId is always disabled
+      employeeId: [{ value: '', disabled: true }], 
+      // accountId is not disabled initially; it is disabled later in ngOnInit if in edit mode
+      accountId: ['', Validators.required], 
       position: ['', Validators.required],
       department: ['', Validators.required],
       hireDate: ['', Validators.required],
@@ -117,7 +124,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
 
     this.submitting = true;
 
-    // Enable employeeId temporarily to include it in payload
+    // Use getRawValue() to include values from disabled form controls (employeeId and accountId)
     const payload = { ...this.form.getRawValue() };
 
     let request$;

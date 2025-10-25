@@ -131,7 +131,17 @@
         // HELPER METHODS FOR JWT
         // --------------------------
         private startRefreshTokenTimer() {
-            const jwtBase64 = this.accountValue?.jwtToken?.split('.')[1];
+            // 🛑 FIX: Ensure there is an account and a JWT before proceeding.
+            // This prevents calculating the token parts if the object is null or missing the token,
+            // which can happen on app load or after logout.
+            if (!this.accountValue || !this.accountValue.jwtToken) {
+                this.stopRefreshTokenTimer(); // Ensure any previous timer is cleared
+                return;
+            }
+
+            const jwtBase64 = this.accountValue.jwtToken.split('.')[1];
+            
+            // Original check for null/undefined split result
             if (!jwtBase64) return;
 
             const jwtToken = JSON.parse(atob(jwtBase64));
